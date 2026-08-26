@@ -15,19 +15,23 @@ sensitive_permissions = {
 print("Health App Privacy Analysis")
 print("---------------------------")
 
-user_input = input(
-    "Enter Android permissions separated by commas: "
-)
+file_name = input("Enter permission file name: ")
 
-permissions = user_input.split(",")
+try:
+    with open(file_name, "r") as file:
+        permissions = file.readlines()
 
-print("\nAnalysis Results")
-print("----------------")
+    print("\nAnalysis Results")
+    print("----------------")
 
-for permission in permissions:
-    permission = permission.strip().upper()
+    for permission in permissions:
+        permission = permission.strip().upper()
 
-    if permission in sensitive_permissions:
-        print(f"{permission}: Privacy-sensitive")
-    else:
-        print(f"{permission}: Not classified as privacy-sensitive")
+        if permission in sensitive_permissions:
+            print(f"{permission}: Privacy-sensitive")
+        else:
+            print(f"{permission}: Not classified as privacy-sensitive")
+
+except FileNotFoundError:
+    print("Error: File not found.")
+
