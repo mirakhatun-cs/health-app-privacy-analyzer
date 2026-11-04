@@ -1,183 +1,295 @@
-# Health App Privacy Analyzer
+# 🛡️ Health App Privacy Explainer
 
-**A Python-based research prototype for analyzing privacy and security indicators in Android health applications.**
+**An evidence-aware Android health-app privacy analysis tool combining rule-based security analysis with Meta AI-powered explanations.**
+
+**Meta Global AI Developer Hackathon 2026**
+
+Track: Indie Developer
+
+Theme: Build for Your World
+
+**Developer:** Mira Khatun
+**Institution:** Kent State University
 
 ## Overview
 
-Mobile health applications, including pregnancy trackers, menstrual health apps, and patient portals, may process highly sensitive personal information. Understanding the privacy implications of their permissions and third-party software components is an important part of mobile application security research.
+Android health applications can process highly sensitive personal information, including medical records, reproductive health information, and mental health data.
 
-The **Health App Privacy Analyzer** is a Python-based tool developed to help organize and interpret selected privacy-related indicators identified during Android application analysis.
+Security analysis tools such as MobSF identify technical indicators, but their results can be difficult for nontechnical users to understand.
 
-The project focuses on classifying permissions, recognizing known third-party SDKs, and highlighting findings that may require further investigation.
+**Health App Privacy Explainer** aims to make these findings more accessible by combining deterministic Python analysis with AI-generated explanations using Meta's Muse Spark model.
 
-This project is part of my ongoing undergraduate cybersecurity research at **Kent State University**, conducted under the mentorship of **Dr. Raiful Hasan in the SPIRIT Lab**.
+The application identifies selected Android permission and third-party SDK indicators, organizes them into understandable categories, and is designed to explain what the evidence does and does not establish.
 
-## Research Objectives
+## The Problem
 
-- Investigate privacy-sensitive permissions in Android health applications.
-- Identify and categorize known third-party SDK and tracker indicators.
-- Examine potential privacy concerns associated with application functionality.
-- Develop a structured approach for interpreting technical security findings.
-- Support further research into transparency and privacy protection in mobile health applications.
+A security report may identify permissions such as `CAMERA`, `RECORD_AUDIO`, or `ACCESS_FINE_LOCATION`, along with third-party analytics or advertising SDK indicators.
 
-## Implemented Features
+However, these findings alone do not prove that an application collects or shares sensitive information.
 
-### 1. Android Permission Analysis
+Users need a way to understand:
 
-- Reads permissions from a text file.
-- Categorizes recognized Android permissions by functionality.
-- Identifies permissions classified as privacy-sensitive using predefined rules.
+- What the identified permissions allow.
+- Why certain SDK indicators deserve attention.
+- Which findings are directly supported by static evidence.
+- What behavior remains unverified.
+- What additional investigation may be appropriate.
+
+## Our Solution
+
+The application follows this pipeline:
+
+**MobSF-style JSON → Python Analyzer → Meta Muse Spark → Streamlit Dashboard**
+
+The rule-based Python analyzer classifies technical findings.
+
+Meta Muse Spark is integrated to generate understandable explanations with explicit uncertainty and recommended verification steps.
+
+The dashboard presents the findings and supports downloading structured analysis results.
+
+## Features
+
+### 1. JSON Report Upload
+
+- Upload a supported JSON report.
+- Extract application metadata, permissions, and SDK indicators.
+- Display permission and tracker counts.
+- Handle invalid JSON.
+
+**Current limitation:** JSON ingestion has been tested with synthetic MobSF-style data. Compatibility with actual MobSF exports still requires validation.
+
+### 2. Permission Analysis
+
+- Classifies selected Android permissions.
+- Identifies predefined privacy-sensitive categories.
 - Flags unrecognized permissions for further review.
-- Generates permission counts and a summary.
+- Generates permission counts.
 
-### 2. Third-Party SDK and Tracker Analysis
+### 3. Third-Party SDK Analysis
 
-- Reads SDK or tracker names from a text file.
-- Recognizes selected known SDKs, including AppsFlyer, Firebase Analytics, Google Crashlytics, AdMob, and Localytics.
-- Categorizes recognized components by their primary functions, such as analytics, advertising, attribution, and crash reporting.
-- Flags unrecognized entries for further investigation.
-- Generates summary counts.
+Recognizes selected SDK indicators, including:
 
-### 3. Combined Privacy Analysis
+- AppsFlyer
+- Firebase Analytics
+- Google Crashlytics
+- AdMob
+- Localytics
 
-The main analyzer combines permission and tracker classifications into a single console report.
+The system categorizes recognized entries and flags unknown components.
 
-It displays:
+### 4. Meta AI Explanations
 
-- Total permissions analyzed
-- Number of permissions classified as privacy-sensitive
-- Total tracker entries analyzed
-- Number of recognized tracker entries
-- Individual classifications and items requiring further review
+The project includes an integration with **Meta Muse Spark 1.3 through Meta Model API**.
 
-## Technologies Used
+The AI component is designed to provide:
 
-- **Python** — Rule-based classification and report generation
-- **MobSF** — Used in the broader research workflow for Android security analysis
-- **Android Static Analysis** — Examination of application components and potential privacy indicators
-- **GitHub** — Version control and project documentation
+- Plain-English explanations of security findings.
+- Confirmed technical indicators.
+- Unconfirmed privacy possibilities.
+- Recommended verification steps.
+
+The model is instructed not to invent findings or present static indicators as confirmed malicious behavior.
+
+**Integration status:** The Python integration module imports successfully, and the Streamlit interface invokes it. Live inference has not yet been verified because the API returned a billing-verification error. Successful AI-generated output remains a pending test.
+
+### 5. Interactive Streamlit Dashboard
+
+The dashboard includes:
+
+- JSON upload.
+- Application details.
+- Permission and SDK summary metrics.
+- Permission classification table.
+- Third-party SDK indicator table.
+- Privacy interpretation section.
+- Meta AI explanation button.
+- Downloadable structured analysis in JSON format.
+
+### 6. Evidence-Aware Interpretation
+
+The project distinguishes three categories:
+
+**Confirmed Technical Indicator:** A finding directly identified in the supplied report.
+
+**Unconfirmed Possibility:** A potential implication that cannot be established from static findings alone.
+
+**Recommended Verification:** A suggested additional investigation, such as manual code inspection or network traffic analysis.
+
+These categories prevent unsupported claims about data collection or transmission.
+
+## Technical Architecture
+
+| Component | Technology |
+|---|---|
+| Programming language | Python |
+| Static analysis source | MobSF |
+| Classification engine | Rule-based Python |
+| AI model | Meta Muse Spark 1.3 |
+| AI interface | Meta Model API |
+| Dashboard | Streamlit |
+| Version control | GitHub |
+| Development environment | GitHub Codespaces |
 
 ## Project Structure
 
 | File | Description |
 |---|---|
-| `privacy_analyzer.py` | Analyzes and categorizes Android permissions |
-| `tracker_analyzer.py` | Categorizes third-party SDK and tracker entries |
-| `health_app_analyzer.py` | Combines permission and tracker analysis |
-| `sample_permissions.txt` | Sample permission input data |
-| `sample_trackers.txt` | Sample SDK/tracker input data |
+| `health_app_analyzer.py` | Original combined text-file analyzer |
+| `privacy_analyzer.py` | Original permission analysis |
+| `tracker_analyzer.py` | Original SDK analysis |
+| `mobsf_parser.py` | JSON report parsing |
+| `analysis_engine.py` | Structured permission and SDK classification |
+| `meta_explainer.py` | Meta Muse Spark integration |
+| `app.py` | Streamlit dashboard |
+| `sample_mobsf.json` | Synthetic JSON test report |
+| `sample_permissions.txt` | Original sample permissions |
+| `sample_trackers.txt` | Original sample SDK entries |
+| `test_meta.py` | Meta API connection test |
 | `README.md` | Project documentation |
 
-## How to Run
+## Installation
 
-### Step 1: Clone the Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/mirakhatun-cs/health-app-privacy-analyzer.git
 cd health-app-privacy-analyzer
 ```
 
-### Step 2: Run the Combined Analyzer
+### 2. Install Dependencies
 
-Make sure Python 3 is installed.
+Python 3 is required.
+
+```bash
+python -m pip install streamlit openai
+```
+
+### 3. Configure Meta Model API
+
+Create an API key through the Meta developer platform:
+
+https://dev.meta.ai/
+
+Set the environment variable `MODEL_API_KEY` using a secure method, such as GitHub Codespaces secrets.
+
+Never commit your API key to the repository.
+
+Meta AI features require an active, authorized API account. API usage may incur charges depending on available credits and billing settings.
+
+### 4. Run the Application
+
+```bash
+python -m streamlit run app.py
+```
+
+Open the URL displayed by Streamlit.
+
+### 5. Upload a Report
+
+Upload `sample_mobsf.json` to test the currently supported JSON format.
+
+The sample report is synthetic and is intended for demonstration and software testing.
+
+### 6. Generate an AI Explanation
+
+Click **Generate Meta AI Explanation** after uploading a report.
+
+This feature requires successful Meta Model API authorization and billing verification.
+
+If the model is unavailable, the dashboard displays an error instead of inventing a response.
+
+## Original Research Prototype
+
+The original research implementation uses manually prepared text files.
+
+To run it:
 
 ```bash
 python health_app_analyzer.py
 ```
 
-If your system uses `python3`, run:
-
-```bash
-python3 health_app_analyzer.py
-```
-
-### Step 3: Enter the Input Files
-
-When prompted, enter:
-
-**Permission file:**
+Enter:
 
 ```text
 sample_permissions.txt
-```
-
-**Tracker file:**
-
-```text
 sample_trackers.txt
 ```
 
-### Step 4: Review the Results
+This original analyzer remains available alongside the newer dashboard application.
 
-The analyzer prints categorized permission and tracker findings, followed by a summary.
+## Current Testing Status
 
-The supplied sample files contain seven permission entries and six tracker entries, including one unrecognized SDK.
+| Test | Status |
+|---|---|
+| Original text-file analyzer | Passed |
+| Synthetic JSON parser test | Passed |
+| Structured analysis engine | Passed |
+| Streamlit server startup | Passed |
+| Dashboard JSON upload and classification | Passed |
+| Meta integration module import | Passed |
+| Meta API live inference | Blocked by billing verification |
+| Actual MobSF JSON compatibility | Not yet validated |
+| Full end-to-end AI demonstration | Pending |
 
-The scripts can also be run individually:
+The current synthetic dashboard test identifies four permission entries, three classified as privacy-sensitive, and three recognized SDK indicators.
 
-```bash
-python privacy_analyzer.py
-python tracker_analyzer.py
-```
+## Responsible Security Analysis
 
-**Note:** The current prototype requires manually prepared text-file inputs. It does not directly scan APK files or automatically import MobSF JSON reports.
+This tool does not claim that any analyzed application is malicious or violates a privacy policy.
 
-## How the Analyzer Works
+Key limitations:
 
-The current workflow follows a rule-based approach:
+- Permission declarations do not prove that permissions are exercised.
+- SDK indicators do not prove that sensitive data is transmitted.
+- SDK identification is based on the supplied report and predefined classification rules.
+- Static analysis alone cannot verify runtime data flows.
+- The tool does not automatically scan APK files.
+- The current version does not perform network monitoring or privacy-policy compliance verification.
+- AI explanations require further testing and should not replace independent security validation.
 
-1. Collect relevant permission and SDK information during Android application analysis.
-2. Prepare text files containing the identified entries.
-3. Run the Python analyzer.
-4. Compare the entries against predefined classification dictionaries.
-5. Display recognized categories, unknown entries, and summary counts.
-6. Review the findings alongside the application's functionality and other research evidence.
+Additional manual investigation and dynamic analysis may be needed.
 
-## Research Limitations
+## Hackathon Development and Research Attribution
 
-This analyzer is designed to identify **potential privacy indicators, not prove malicious or unauthorized application behavior**.
+This project builds upon my earlier undergraduate cybersecurity research at Kent State University, conducted under the mentorship of Dr. Raiful Hasan in the SPIRIT Lab.
 
-Important limitations include:
+The original research prototype includes permission classification, third-party SDK recognition, and a combined Python console analyzer.
 
-- A requested permission does not prove that an application actively accesses the associated data.
-- The presence of an analytics or advertising SDK does not establish that sensitive health information is transmitted.
-- SDK classifications are based on predefined names and do not independently verify SDK presence in an APK.
-- The tool does not currently perform dynamic analysis or network traffic monitoring.
-- The current prototype does not establish whether an application complies with its privacy policy.
+The Meta Global AI Developer Hackathon extension adds:
 
-Additional manual investigation, runtime testing, and network analysis may be necessary to validate findings.
+- Structured JSON parsing.
+- A reusable analysis engine.
+- A Streamlit dashboard.
+- Meta Muse Spark API integration code.
+- Evidence-aware AI explanation instructions.
+- Structured JSON export.
+
+The pre-existing research components and the hackathon additions are distinguished for transparency.
 
 ## Future Development
 
-Planned improvements include:
-
-- Automatic processing of MobSF JSON reports
-- Expanded permission and SDK detection rules
-- Organization of CWE and security findings
-- Comparison of multiple Android health applications
-- Structured and exportable privacy reports
-- More accessible explanations of technical findings
-- Improved validation through additional application testing
-
-## Project Status
-
-🚧 **Active Development — Ongoing Undergraduate Research**
-
-The current version provides a working rule-based prototype for permission and tracker classification.
-
-Development continues as part of a broader investigation into privacy and security risks in mobile health applications.
-
-## Research Affiliation
-
-**Kent State University**  
-SPIRIT Lab  
-Research Mentor: Dr. Raiful Hasan
+- Validate parsing with actual MobSF JSON exports.
+- Expand supported MobSF findings and security indicators.
+- Improve SDK and permission recognition.
+- Test and evaluate AI explanation accuracy.
+- Add support for CWE-related findings.
+- Automate APK analysis through MobSF.
+- Add dynamic network analysis.
+- Develop a more advanced privacy investigation workflow.
 
 ## Author
 
-**Mira Khatun**  
-Undergraduate Cybersecurity Researcher  
+**Mira Khatun**
+Undergraduate Cybersecurity Researcher
 Kent State University
+
+Research Mentor: Dr. Raiful Hasan
+SPIRIT Lab
 
 [GitHub Profile](https://github.com/mirakhatun-cs)
 
+## Project Status
+
+**Hackathon MVP — Active Development**
+
+The rule-based analysis and dashboard are functional with synthetic test data. Live Meta AI inference and actual MobSF report validation remain pending.

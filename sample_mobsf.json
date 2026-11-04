@@ -1,0 +1,16 @@
+
+{
+  "app_name": "Sample Health App",
+  "package_name": "com.example.health",
+  "permissions": {
+    "android.permission.CAMERA": {},
+    "android.permission.INTERNET": {},
+    "android.permission.RECORD_AUDIO": {},
+    "android.permission.ACCESS_FINE_LOCATION": {}
+  },
+  "trackers": [
+    "AppsFlyer",
+    "Firebase Analytics",
+    "Google Crashlytics"
+  ]
+}
