@@ -13,7 +13,7 @@ def explain_findings(findings):
     client = OpenAI(
         api_key=os.environ["MODEL_API_KEY"],
         base_url="https://api.meta.ai/v1",
-        timeout=30.0,
+        timeout=60.0,
         max_retries=0,
     )
 
@@ -58,10 +58,18 @@ Recommended Verification
                     "content": json.dumps(safe_findings),
                 },
             ],
-            max_tokens=900,
+            max_tokens=4000,
         )
 
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
+
+        if not content:
+            raise RuntimeError(
+                "Meta returned no explanation text. "
+                "Check the model's token limit and response."
+            )
+
+        return content
 
     except APIStatusError as error:
         if error.status_code == 402:
